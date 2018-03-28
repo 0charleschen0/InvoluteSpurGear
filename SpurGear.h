@@ -8,13 +8,14 @@
 #include "utils/AngleUtils.h"
 #include "utils/Pair.h"
 
+#define FILLET_RADIUS 0.05
+
 using namespace std;
 class SpurGear {
 private:
     int teethNumber;
     double module;
     AngleUtils pressAngle = AngleUtils();
-    const double filletRadius = 0.05;
 
     double pd;
     double pitchDiameter;
@@ -22,7 +23,16 @@ private:
     double addendumDiameter;
     double dedendumDiameter;
 
+    double theta0;
     vector<Pair<double, double>> pairList = vector<Pair<double, double>>();
+    vector<double> thetaList = vector<double>();
+
+    vector<Pair<double, double>> involute = vector<Pair<double, double>>();
+    vector<Pair<double, double>> addendumCircle = vector<Pair<double, double>>();
+    vector<Pair<double, double>> curveBetweenBaseAndDedendumCircle = vector<Pair<double, double>>();
+    vector<Pair<double, double>> dedendumCircle = vector<Pair<double, double>>();
+    vector<Pair<double, double>> fillet = vector<Pair<double, double>>();
+
 
 public:
    SpurGear(int teethNumber, double module, double press) {
