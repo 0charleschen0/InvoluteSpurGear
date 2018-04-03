@@ -23,18 +23,18 @@ void AngleUtils::setRadian(double radian) {
     this->radian.set(radian);
 }
 
-double AngleUtils::sin() {
+inline double AngleUtils::sin() {
 //    if (isnan(cache.getSinValue())) {
 //        cache.setSinValue(std::sin(radian.get()));
 //    }
     return std::sin(radian.get());
 }
 
-double AngleUtils::cos() {
+inline double AngleUtils::cos() {
     return std::cos(radian.get());
 }
 
-double AngleUtils::tan() {
+inline double AngleUtils::tan() {
     return std::tan(radian.get());
 }
 

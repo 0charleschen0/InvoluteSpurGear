@@ -63,67 +63,6 @@ private:
         }
     } degree;
 
-//    class ComputeCache {
-//    private:
-//        static map<string, double> cacheMap;
-//        static
-//        static vector<string> keyArray;
-//
-//        double getValue(string key) {
-//            if (isValidKey(key))
-//                return cacheMap[key];
-//            return numeric_limits<double>::quiet_NaN();
-//        }
-//
-//        void setValue(string key, double value) {
-//            if (!isValidKey(key))
-//                return;
-//            if (!isnan(value)) {
-//                cacheMap[key] = value;
-//            }
-//        }
-//
-//        bool isValidKey(string key) {
-//            return VectorUtils::contains(keyArray, key);
-//        }
-//    public:
-//        ComputeCache() {
-//            keyArray = vector(3);
-//            keyArray.push_back("sin");
-//            keyArray.push_back("cos");
-//            keyArray.push_back("tan");
-//
-//            cacheMap = map();
-//            for (string key : keyArray) {
-//                cacheMap[key] = numeric_limits<double>::quiet_NaN();
-//            }
-//        };
-//
-//        double getSinValue() {
-//            return getValue("sin");
-//        }
-//
-//        double getCosValue() {
-//            return getValue("cos");
-//        }
-//
-//        double getTanValue() {
-//            return getValue("tan");
-//        }
-//
-//        void setSinValue(double value) {
-//            setValue("sin", value);
-//        }
-//
-//        void setCosValue(double value) {
-//            setValue("cos", value);
-//        }
-//
-//        void setTanValue(double value) {
-//            setValue("tan", value);
-//        }
-//    } cache;
-
 public:
     AngleUtils();
     AngleUtils(Degree degree, Radian radian);
