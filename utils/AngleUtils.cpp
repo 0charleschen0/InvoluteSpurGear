@@ -23,21 +23,6 @@ void AngleUtils::setRadian(double radian) {
     this->radian.set(radian);
 }
 
-inline double AngleUtils::sin() {
-//    if (isnan(cache.getSinValue())) {
-//        cache.setSinValue(std::sin(radian.get()));
-//    }
-    return std::sin(radian.get());
-}
-
-inline double AngleUtils::cos() {
-    return std::cos(radian.get());
-}
-
-inline double AngleUtils::tan() {
-    return std::tan(radian.get());
-}
-
 AngleUtils AngleUtils::toComplementary() {
     return {this->degree.toComplementary(), this->radian.toComplementary()};
 }

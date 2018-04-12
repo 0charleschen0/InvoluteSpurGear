@@ -11,10 +11,8 @@ private:
     T first;
     V second;
 public:
-    Pair(T first, V second) {
-        this->first = first;
-        this->second = second;
-    }
+    Pair(T t_first, V t_second)
+    : first(t_first), second(t_second){}
 
     T x() {
         return first;

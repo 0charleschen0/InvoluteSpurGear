@@ -6,56 +6,83 @@
 #define INVOLUTESPURGEAR_SPURGEAR_H
 
 #include "utils/AngleUtils.h"
-#include "utils/Pair.h"
+#include "third-party/include/opencv2/opencv.hpp"
+#include "third-party/include/opencv2/core/core.hpp"
 
-#define FILLET_RADIUS 0.05
+namespace spur_gear {
+    class SpurGear {
 
-using namespace std;
-class SpurGear {
-private:
-    int teethNumber;
-    double module;
-    AngleUtils pressAngle = AngleUtils();
+    public:
+        constexpr static double FILLET_RADIUS = 0.05;
 
-    double dimetralPitch;
-    double pitchDiameter;
-    double baseCircleDiameter;
-    double addendumDiameter;
-    double dedendumDiameter;
+        SpurGear(const int t_teethNumber = 25, const double t_module = 4.0, const double t_press = 20.0)
+                : m_teeth_number(t_teethNumber), m_module(t_module) {
+               this->m_press_angle.setDegree(t_press);
 
-    double theta0;
+               this->m_dimetral_pitch = 25.4 / m_module;
+               this->m_pitch_diameter = m_teeth_number * m_module;
+               this->m_base_circle_diameter = m_pitch_diameter * m_press_angle.cos();
+               this->m_addendum_diameter = m_pitch_diameter + 2 * m_module;
+               this->m_dedendum_diameter = m_pitch_diameter - 2.5 * m_module;
+        }
 
-    vector<double> thetaList = vector<double>();
+        vector<cv::Point2d> getGearCoordinates();
 
-    vector<Pair<double, double>> involute = vector<Pair<double, double>>();
-    vector<Pair<double, double>> addendumCircle = vector<Pair<double, double>>();
-    vector<Pair<double, double>> curveBetweenBaseAndDedendumCircle = vector<Pair<double, double>>();
-    vector<Pair<double, double>> dedendumCircle = vector<Pair<double, double>>();
-    vector<Pair<double, double>> fillet = vector<Pair<double, double>>();
-    vector<Pair<double, double>> gear = vector<Pair<double, double>>();
+        int getTeethNumber() const {
+               return m_teeth_number;
+        }
 
-    vector<Pair<double, double>> computeMatrix(double* matrix, vector<Pair<double, double>> pairList, int begin, int end);
+        double getPressAngle() const {
+               return m_press_angle.getDegreeValue();
+        }
 
-    void generateInvoluteProfile();
-    void calculateAddendumCircle();
-    void caculateCurveBetweenBaseAndDedendumCircle();
-    void caculateDedendumCircle();
-    void caculateFillet();
-    void getWholeTeethReflection();
-    void generateWholeGear();
-public:
-   SpurGear(int teethNumber, double module, double press) {
-       this->teethNumber = teethNumber;
-       this->module = module;
-       this->pressAngle.setDegree(press);
+        double getModule() const {
+               return m_module;
+        }
 
-       this->dimetralPitch = 25.4/module;
-       this->pitchDiameter = teethNumber*module;
-       this->baseCircleDiameter = pitchDiameter*pressAngle.cos();
-       this->addendumDiameter = pitchDiameter + 2*module;
-       this->dedendumDiameter = pitchDiameter - 2.5*module;
-   }
+        vector<cv::Point2d> getGear() const {
+            return m_gear;
+        }
 
-   vector<Pair<double, double>> getGearCordinates();
+    private:
+
+        const int m_teeth_number;
+        const double m_module;
+        AngleUtils m_press_angle = AngleUtils();
+
+        double m_dimetral_pitch;
+        double m_pitch_diameter;
+        double m_base_circle_diameter;
+        double m_addendum_diameter;
+        double m_dedendum_diameter;
+
+        double m_theta0;
+
+        vector<cv::Point2d> m_involute = vector<cv::Point2d>();
+        vector<cv::Point2d> m_addendum_circle = vector<cv::Point2d>();
+        vector<cv::Point2d> m_curve_between_base_and_dedendum_circle = vector<cv::Point2d>();
+        vector<cv::Point2d> m_dedendum_circle = vector<cv::Point2d>();
+        vector<cv::Point2d> m_fillet = vector<cv::Point2d>();
+        vector<cv::Point2d> m_gear = vector<cv::Point2d>();
+
+        vector<cv::Point2d> computeMatrix(double *matrix, vector<cv::Point2d> points, int begin, int end);
+
+        void generateInvoluteProfile();
+
+        void calculateAddendumCircle();
+
+        void caculateCurveBetweenBaseAndDedendumCircle();
+
+        void caculateDedendumCircle();
+
+        void caculateFillet();
+
+        void getWholeTeethReflection();
+
+        void generateWholeGear();
+    };
+
+    std::ostream& operator<<(std::ostream& out, const spur_gear::SpurGear& gear);
+    std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point2d>& list);
 };
 #endif //INVOLUTESPURGEAR_SPURGEAR_H

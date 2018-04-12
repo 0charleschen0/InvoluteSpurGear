@@ -4,6 +4,7 @@
 #ifndef GEARDEMO_C_ANGLEUTILS_H
 #define GEARDEMO_C_ANGLEUTILS_H
 
+#define _MATH_DEFINES_DEFINED
 #include <cmath>
 #include <map>
 #include <string>
@@ -12,7 +13,9 @@
 
 #include "VectorUtils.h"
 
-using namespace std;
+#ifndef MINGW
+#define M_PI       3.14159265358979323846   // pi
+#endif // !MINGW
 
 class AngleUtils {
 private:
@@ -27,7 +30,7 @@ private:
             this->number = number;
         }
 
-        double get() {
+        double get() const {
             return number;
         }
 
@@ -50,7 +53,7 @@ private:
             this->number = number;
         }
 
-        double get() {
+        double get() const {
             return number;
         }
 
@@ -63,6 +66,14 @@ private:
         }
     } degree;
 
+    inline static double toDegree(double radian) {
+        return radian/M_PI*180.0;
+    }
+
+    inline static double toRadian(double degree) {
+        return degree*M_PI/180.0;
+    }
+
 public:
     AngleUtils();
     AngleUtils(Degree degree, Radian radian);
@@ -74,7 +85,7 @@ public:
         return this->radian;
     }
 
-    double getRadianValue() {
+    double getRadianValue() const {
         return this->radian.get();
     }
 
@@ -82,22 +93,22 @@ public:
         return this->degree;
     }
 
-    double getDegreeValue() {
+    double getDegreeValue() const {
         return this->degree.get();
     }
 
     AngleUtils toComplementary();
 
-    inline double sin();
-    inline double cos();
-    inline double tan();
+    inline double sin() const {
+        return std::sin(radian.get());
+    };
 
-    inline static double toDegree(double radian) {
-        return radian/M_PI*180.0;
-    }
+    inline double cos() const {
+        return std::cos(radian.get());
+    };
 
-    inline static double toRadian(double degree) {
-        return degree*M_PI/180.0;
-    }
+    inline double tan() const {
+        return std::tan(radian.get());
+    };
 };
 #endif //GEARDEMO_C_ANGLEUTILS_H
