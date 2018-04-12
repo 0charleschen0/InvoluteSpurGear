@@ -15,8 +15,11 @@ namespace spur_gear {
     public:
         constexpr static double FILLET_RADIUS = 0.05;
 
-        SpurGear(const int t_teethNumber = 25, const double t_module = 4.0, const double t_press = 20.0)
-                : m_teeth_number(t_teethNumber), m_module(t_module) {
+        SpurGear(const int t_teethNumber = 25, const double t_module = 4.0, const double t_press = 20.0,
+                 const double t_fillet_radius = 0.05)
+                : m_teeth_number(t_teethNumber),
+                  m_module(t_module),
+                  m_fillet_radius(t_fillet_radius) {
                this->m_press_angle.setDegree(t_press);
 
                this->m_dimetral_pitch = 25.4 / m_module;
@@ -49,6 +52,7 @@ namespace spur_gear {
         const int m_teeth_number;
         const double m_module;
         AngleUtils m_press_angle = AngleUtils();
+        const double m_fillet_radius;
 
         double m_dimetral_pitch;
         double m_pitch_diameter;

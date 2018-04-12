@@ -55,14 +55,14 @@ namespace spur_gear {
  */
     void SpurGear::caculateCurveBetweenBaseAndDedendumCircle() {
         int n = 3;
-        m_theta0 = asin((m_involute[m_involute.size() - 1].x + FILLET_RADIUS) / (m_dedendum_diameter / 2));
+        m_theta0 = asin((m_involute[m_involute.size() - 1].x + m_fillet_radius) / (m_dedendum_diameter / 2));
         for (int i = 0; i < n; i++) {
             //to find the angle between the central line (y-axis) and the line from the center
             //to the last point of the involute curve.
             cv::Point2d point = m_involute[m_involute.size() - 1];
             m_curve_between_base_and_dedendum_circle.push_back(
                     cv::Point2d(point.x,
-                            point.y - (point.y - FILLET_RADIUS - (m_dedendum_diameter / 2) * cos(m_theta0)) * i / n)
+                            point.y - (point.y - m_fillet_radius - (m_dedendum_diameter / 2) * cos(m_theta0)) * i / n)
             );
         }
     }
@@ -91,8 +91,8 @@ namespace spur_gear {
         int n = 5;
         for (int i = 0; i < n; i++) {
             m_fillet.push_back(cv::Point2d(
-                    m_dedendum_circle[0].x - FILLET_RADIUS * cos(i * M_PI / (2 * (n - 1))),
-                    m_dedendum_circle[0].y + FILLET_RADIUS * (1 - sin(i) * M_PI / 2 * (n - 1))
+                    m_dedendum_circle[0].x - m_fillet_radius * cos(i * M_PI / (2 * (n - 1))),
+                    m_dedendum_circle[0].y + m_fillet_radius * (1 - sin(i) * M_PI / 2 * (n - 1))
             ));
         }
     }
