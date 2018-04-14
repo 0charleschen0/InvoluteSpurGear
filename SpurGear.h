@@ -13,21 +13,8 @@ namespace spur_gear {
     class SpurGear {
 
     public:
-        constexpr static double FILLET_RADIUS = 0.05;
-
         SpurGear(const int t_teethNumber = 25, const double t_module = 4.0, const double t_press = 20.0,
-                 const double t_fillet_radius = 0.05)
-                : m_teeth_number(t_teethNumber),
-                  m_module(t_module),
-                  m_fillet_radius(t_fillet_radius) {
-               this->m_press_angle.setDegree(t_press);
-
-               this->m_dimetral_pitch = 25.4 / m_module;
-               this->m_pitch_diameter = m_teeth_number * m_module;
-               this->m_base_circle_diameter = m_pitch_diameter * m_press_angle.cos();
-               this->m_addendum_diameter = m_pitch_diameter + 2 * m_module;
-               this->m_dedendum_diameter = m_pitch_diameter - 2.5 * m_module;
-        }
+                 const double t_fillet_radius = 0.05, const double t_shift = 0.0, const double t_backlash = 0.0);
 
         vector<cv::Point2d> getGearCoordinates();
 
@@ -53,6 +40,8 @@ namespace spur_gear {
         const double m_module;
         AngleUtils m_press_angle = AngleUtils();
         const double m_fillet_radius;
+        const double m_shift;
+        const double m_backlash;
 
         double m_dimetral_pitch;
         double m_pitch_diameter;

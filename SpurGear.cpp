@@ -8,20 +8,35 @@
  * /To calculate the coordinates of the involute profile
  */
 namespace spur_gear {
+    //TODO: Add undercut protection
+    SpurGear::SpurGear(const int t_teethNumber = 25, const double t_module = 4.0, const double t_press = 20.0,
+             const double t_fillet_radius = 0.05, const double t_shift = 0.0, const double t_backlash = 0.0)
+            : m_teeth_number(t_teethNumber),
+              m_module(t_module),
+              m_fillet_radius(t_fillet_radius),
+              m_shift(t_shift),
+              m_backlash(t_backlash){
+        this->m_press_angle.setDegree(t_press);
+
+        this->m_dimetral_pitch = 25.4 / m_module;
+        this->m_pitch_diameter = m_teeth_number * m_module;
+        this->m_base_circle_diameter = m_pitch_diameter * m_press_angle.cos();
+        this->m_addendum_diameter = m_pitch_diameter + 2 * m_module* (1 + m_shift);
+        this->m_dedendum_diameter = m_pitch_diameter - 2.5 * m_module;
+    }
+
     void SpurGear::generateInvoluteProfile() {
-        double tp = M_PI * m_pitch_diameter / (2 * m_teeth_number);
+        double tooth_space = M_PI * m_pitch_diameter / (2 * m_teeth_number);
         int n = 10;
 
         for (int i = 0; i < n; i++) {
             double r = m_addendum_diameter / 2 - (m_addendum_diameter - m_base_circle_diameter) * i / (2 * (n - 1));
             double phi = acos(m_base_circle_diameter / (2 * r));
 
-            //tooth thickness at any angle phi
-            //involute equation - refer to Shigley's book
-            double toothThickness = 2 * r * (tp / m_pitch_diameter
-                                             + (m_press_angle.tan() - m_press_angle.getRadianValue()) -
-                                             (tan(phi) - phi));
-            double theta = toothThickness / (2 * r);
+            //Involute equation for a angle x (radians) : f(x) = tan(x) - x
+            double theta = (tooth_space / m_pitch_diameter +  2 * m_shift * m_press_angle.getRadianValue() / m_module
+                            + (m_press_angle.tan() - m_press_angle.getRadianValue()) - (tan(phi) - phi));
+
             m_involute.push_back(cv::Point2d(r * sin(theta),
                                          r * cos(theta)));
         }
