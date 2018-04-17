@@ -17,6 +17,8 @@
 #define M_PI       3.14159265358979323846   // pi
 #endif // !MINGW
 
+//class
+
 class AngleUtils {
 private:
     class Radian {

@@ -9,8 +9,8 @@
  */
 namespace spur_gear {
     //TODO: Add undercut protection
-    SpurGear::SpurGear(const int t_teethNumber = 25, const double t_module = 4.0, const double t_press = 20.0,
-             const double t_fillet_radius = 0.05, const double t_shift = 0.0, const double t_backlash = 0.0)
+    SpurGear::SpurGear(const int t_teethNumber, const double t_module, const double t_press,
+             const double t_fillet_radius, const double t_shift, const double t_backlash)
             : m_teeth_number(t_teethNumber),
               m_module(t_module),
               m_fillet_radius(t_fillet_radius),
@@ -37,7 +37,7 @@ namespace spur_gear {
             double theta = (tooth_space / m_pitch_diameter +  2 * m_shift * m_press_angle.getRadianValue() / m_module
                             + (m_press_angle.tan() - m_press_angle.getRadianValue()) - (tan(phi) - phi));
 
-            m_involute.push_back(cv::Point2d(r * sin(theta),
+            m_involute.push_back(cv::Point2d(r * sin(theta) - m_backlash,
                                          r * cos(theta)));
         }
 
@@ -132,8 +132,9 @@ namespace spur_gear {
         for (cv::Point2d p : m_gear) {
             reflect.push_back(cv::Point2d(-1 * p.x, p.y));
         }
-        reverse(reflect.begin(), reflect.end());
+        reverse(m_gear.begin(), m_gear.end());
         m_gear.insert(m_gear.end(), reflect.begin(), reflect.end());
+        reverse(m_gear.begin(), m_gear.end());
 
         pairVectorList.clear();
         reflect.clear();
@@ -145,7 +146,7 @@ namespace spur_gear {
     void SpurGear::generateWholeGear() {
         int size = (int) m_gear.size();
 
-        for (int i = 0; i < m_teeth_number; i++) {
+        for (int i = 1; i < m_teeth_number; i++) {
             double theta = 2 * M_PI * i / m_teeth_number;
             double data[4] = {cos(theta), sin(theta), -1 * sin(theta), cos(theta)};
             vector<cv::Point2d> pairList = computeMatrix(data, m_gear, 0, size);
@@ -183,6 +184,15 @@ namespace spur_gear {
     }
 
     std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point2d>& list) {
+        out << "[\n";
+        for (auto point : list) {
+            out << point.x <<", "<< point.y << '\n';
+        }
+        out << "]\n";
+        return out;
+    }
+
+    std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point>& list) {
         out << "[\n";
         for (auto point : list) {
             out << point.x <<", "<< point.y << '\n';

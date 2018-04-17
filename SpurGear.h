@@ -77,5 +77,6 @@ namespace spur_gear {
 
     std::ostream& operator<<(std::ostream& out, const spur_gear::SpurGear& gear);
     std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point2d>& list);
+    std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point>& list);
 };
 #endif //INVOLUTESPURGEAR_SPURGEAR_H
