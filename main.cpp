@@ -6,8 +6,6 @@
 #include "third-party/include/opencv2/imgproc/imgproc.hpp"
 #include "third-party/include/opencv2/highgui/highgui.hpp"
 
-#include "third-party/include/pngwriter.h"
-
 const string window_name = "Gear Preview";
 
 const double DISPLAY_DPI = 72.0;
@@ -61,27 +59,12 @@ int main() {
 //
     spur_gear::SpurGear gear = spur_gear::SpurGear();
     vector<cv::Point2d> points = gear.getGearCoordinates();
-//
-//    pngwriter png(500, 500, 0, "test.png");
-//
-//    for (cv::Point2d point2d : points) {
-//        png.plot(point2d.x*DISPLAY_DPI/INCH_PER_MM + 250,
-//                 point2d.y*DISPLAY_DPI/INCH_PER_MM + 250,
-//                 0.0,
-//                 0.0,
-//                 1.0);
-//    }
-//
-//    png.close();
-
-
+    
     cv::Mat src = spur_gear::drawContour(points);
     cv::imwrite("test.png", src);
 
     //std::cout << gear;
-
-    //cv::Mat src = cv::imread("test.png");
-
+    
     /// Create a window
     imshow(window_name, src);
 
