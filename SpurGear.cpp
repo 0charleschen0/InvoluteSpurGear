@@ -13,14 +13,13 @@ namespace spur_gear {
              const double t_fillet_radius, const double t_shift, const double t_backlash)
             : m_teeth_number(t_teethNumber),
               m_module(t_module),
+              m_press_angle(Radian(t_press)),
               m_fillet_radius(t_fillet_radius),
               m_shift(t_shift),
               m_backlash(t_backlash){
-        this->m_press_angle.setDegree(t_press);
-
         this->m_dimetral_pitch = 25.4 / m_module;
         this->m_pitch_diameter = m_teeth_number * m_module;
-        this->m_base_circle_diameter = m_pitch_diameter * m_press_angle.cos();
+        this->m_base_circle_diameter = m_pitch_diameter * cos(m_press_angle);
         this->m_addendum_diameter = m_pitch_diameter + 2 * m_module* (1 + m_shift);
         this->m_dedendum_diameter = m_pitch_diameter - 2.5 * m_module;
     }
@@ -34,11 +33,10 @@ namespace spur_gear {
             double phi = acos(m_base_circle_diameter / (2 * r));
 
             //Involute equation for a angle x (radians) : f(x) = tan(x) - x
-            double theta = (tooth_space / m_pitch_diameter +  2 * m_shift * m_press_angle.getRadianValue() / m_module
-                            + (m_press_angle.tan() - m_press_angle.getRadianValue()) - (tan(phi) - phi));
+            double theta = (tooth_space / m_pitch_diameter +  2 * m_shift * m_press_angle.getRadian() / m_module
+                            + (tan(m_press_angle) - m_press_angle.getRadian()) - (tan(phi) - phi));
 
-            m_involute.push_back(cv::Point2d(r * sin(theta) - m_backlash,
-                                         r * cos(theta)));
+            m_involute.emplace_back(r * sin(theta) - m_backlash, r * cos(theta));
         }
 
 //        cout << m_involute;
@@ -51,13 +49,13 @@ namespace spur_gear {
         int n = 5;
 
         double phi = acos(m_base_circle_diameter / (m_addendum_diameter));
-        double theta = (M_PI / (2 * m_teeth_number) + (m_press_angle.tan() - m_press_angle.getRadianValue()) -
-                        (tan(phi) - phi));
+        double theta = (M_PI / (2 * m_teeth_number) + (tan(m_press_angle) - m_press_angle.getRadian())
+                        - (tan(phi) - phi));
 
         for (int i = 0; i < n; i++) {
             double thetaO = theta * i / (n - 1);
-            m_addendum_circle.push_back(cv::Point2d((m_addendum_diameter / 2) * sin(thetaO),
-                                                (m_addendum_diameter / 2) * cos(thetaO)));
+            m_addendum_circle.emplace_back((m_addendum_diameter / 2) * sin(thetaO),
+                                           (m_addendum_diameter / 2) * cos(thetaO));
         }
 
 //        cout<<m_addendum_circle;
@@ -75,10 +73,9 @@ namespace spur_gear {
             //to find the angle between the central line (y-axis) and the line from the center
             //to the last point of the involute curve.
             cv::Point2d point = m_involute[m_involute.size() - 1];
-            m_curve_between_base_and_dedendum_circle.push_back(
-                    cv::Point2d(point.x,
-                            point.y - (point.y - m_fillet_radius - (m_dedendum_diameter / 2) * cos(m_theta0)) * i / n)
-            );
+            m_curve_between_base_and_dedendum_circle.emplace_back(
+                    point.x,
+                    point.y - (point.y - m_fillet_radius - (m_dedendum_diameter / 2) * cos(m_theta0)) * i / n);
         }
     }
 
@@ -91,8 +88,8 @@ namespace spur_gear {
             //(pi/m_teeth_number-theta0) angle subtended for dedendum arc
             double subtendedAngleForDedendumArc = M_PI / m_teeth_number - m_theta0;
             double thetaR = m_theta0 + subtendedAngleForDedendumArc * i / (n - 1);
-            m_dedendum_circle.push_back(cv::Point2d(m_dedendum_diameter * sin(thetaR) / 2,
-                                                m_dedendum_diameter * cos(thetaR) / 2));
+            m_dedendum_circle.emplace_back(m_dedendum_diameter * sin(thetaR) / 2,
+                                           m_dedendum_diameter * cos(thetaR) / 2);
         }
 //        cout << m_dedendum_circle;
     }
@@ -105,10 +102,9 @@ namespace spur_gear {
     void SpurGear::caculateFillet() {
         int n = 5;
         for (int i = 0; i < n; i++) {
-            m_fillet.push_back(cv::Point2d(
+            m_fillet.emplace_back(
                     m_dedendum_circle[0].x - m_fillet_radius * cos(i * M_PI / (2 * (n - 1))),
-                    m_dedendum_circle[0].y + m_fillet_radius * (1 - sin(i) * M_PI / 2 * (n - 1))
-            ));
+                    m_dedendum_circle[0].y + m_fillet_radius * (1 - sin(i) * M_PI / 2 * (n - 1)));
         }
     }
 
@@ -116,7 +112,7 @@ namespace spur_gear {
  * To reflect the involute curve about y axis to get the whole tooth
  */
     void SpurGear::getWholeTeethReflection() {
-        vector<vector<cv::Point2d>> pairVectorList = vector<vector<cv::Point2d>>();
+        std::vector<std::vector<cv::Point2d>> pairVectorList = std::vector<std::vector<cv::Point2d>>();
 
         pairVectorList.push_back(m_addendum_circle);
         pairVectorList.push_back(m_involute);
@@ -124,13 +120,13 @@ namespace spur_gear {
         pairVectorList.push_back(m_fillet);
         pairVectorList.push_back(m_dedendum_circle);
 
-        for (vector<cv::Point2d> v : pairVectorList) {
+        for (std::vector<cv::Point2d> v : pairVectorList) {
             m_gear.insert(m_gear.end(), v.begin(), v.end());
         }
 
-        vector<cv::Point2d> reflect = vector<cv::Point2d>();
+        std::vector<cv::Point2d> reflect = std::vector<cv::Point2d>();
         for (cv::Point2d p : m_gear) {
-            reflect.push_back(cv::Point2d(-1 * p.x, p.y));
+            reflect.emplace_back(-1 * p.x, p.y);
         }
         reverse(m_gear.begin(), m_gear.end());
         m_gear.insert(m_gear.end(), reflect.begin(), reflect.end());
@@ -144,27 +140,27 @@ namespace spur_gear {
  * To rotate and append the tooth to generate the gear
  */
     void SpurGear::generateWholeGear() {
-        int size = (int) m_gear.size();
+        auto size = (int) m_gear.size();
 
         for (int i = 1; i < m_teeth_number; i++) {
             double theta = 2 * M_PI * i / m_teeth_number;
             double data[4] = {cos(theta), sin(theta), -1 * sin(theta), cos(theta)};
-            vector<cv::Point2d> pairList = computeMatrix(data, m_gear, 0, size);
+            std::vector<cv::Point2d> pairList = computeMatrix(data, m_gear, 0, size);
             m_gear.insert(m_gear.end(), pairList.begin(), pairList.end());
         }
     }
 
-    vector<cv::Point2d> SpurGear::computeMatrix(double *matrix, vector<cv::Point2d> points, int begin, int end) {
-        vector<cv::Point2d> result = vector<cv::Point2d>();
+    std::vector<cv::Point2d> SpurGear::computeMatrix(double *matrix, std::vector<cv::Point2d> points, int begin, int end) {
+        std::vector<cv::Point2d> result = std::vector<cv::Point2d>();
         for (int i = begin; i < end; i++) {
-            result.push_back(cv::Point2d(
+            result.emplace_back(
                     matrix[0] * points[i].x + matrix[1] * points[i].y,
-                    matrix[2] * points[i].x + matrix[3] * points[i].y));
+                    matrix[2] * points[i].x + matrix[3] * points[i].y);
         }
         return result;
     }
 
-    vector<cv::Point2d> SpurGear::getGearCoordinates() {
+    std::vector<cv::Point2d> SpurGear::getGearCoordinates() {
         generateInvoluteProfile();
         calculateAddendumCircle();
         caculateCurveBetweenBaseAndDedendumCircle();

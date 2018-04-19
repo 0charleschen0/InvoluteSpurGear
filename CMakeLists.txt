@@ -18,7 +18,7 @@ endif()
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_executable(InvoluteSpurGear main.cpp SpurGear.h utils/AngleUtils.h utils/AngleUtils.cpp utils/VectorUtils.h SpurGear.cpp)
+add_executable(InvoluteSpurGear main.cpp SpurGear.h utils/Radian.h SpurGear.cpp)
 
 # add libs you need
 set(OpenCV_LIBS opencv_core opencv_imgproc opencv_highgui opencv_imgcodecs)

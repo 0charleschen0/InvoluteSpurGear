@@ -6,25 +6,25 @@
 #include "third-party/include/opencv2/imgproc/imgproc.hpp"
 #include "third-party/include/opencv2/highgui/highgui.hpp"
 
-const string window_name = "Gear Preview";
+const std::string window_name = "Gear Preview";
 
 const double DISPLAY_DPI = 72.0;
 const double INCH_PER_MM = 25.4;
 
 namespace spur_gear {
-    cv::Mat drawContour(vector<cv::Point2d> contour) {
+    cv::Mat drawContour(std::vector<cv::Point2d> contour) {
 
         cv::Mat src = cv::Mat::zeros(cv::Size(500, 500), CV_8UC3);
 
-        vector<cv::Point> points = vector<cv::Point>();
+        std::vector<cv::Point> points = std::vector<cv::Point>();
         for (cv::Point2d point2d : contour) {
-            points.push_back( cv::Point(static_cast<int>(point2d.x * DISPLAY_DPI / INCH_PER_MM + 250),
-                                        static_cast<int>(point2d.y * DISPLAY_DPI / INCH_PER_MM + 250)));
+            points.emplace_back(static_cast<int>(point2d.x * DISPLAY_DPI / INCH_PER_MM + 250),
+                                static_cast<int>(point2d.y * DISPLAY_DPI / INCH_PER_MM + 250));
         }
 
-        string filename = "test.txt";
-        fstream fp;
-        fp.open(filename, ios::out);
+        std::string filename = "test.txt";
+        std::fstream fp;
+        fp.open(filename, std::ios::out);
         if(fp) {
             fp<<points;
         }
@@ -58,7 +58,7 @@ int main() {
 //    cin>>press_angle;
 //
     spur_gear::SpurGear gear = spur_gear::SpurGear();
-    vector<cv::Point2d> points = gear.getGearCoordinates();
+    std::vector<cv::Point2d> points = gear.getGearCoordinates();
     
     cv::Mat src = spur_gear::drawContour(points);
     cv::imwrite("test.png", src);
