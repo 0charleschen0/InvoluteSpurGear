@@ -160,7 +160,7 @@ namespace spur_gear {
         return result;
     }
 
-    std::vector<cv::Point2d> SpurGear::getGearCoordinates() {
+    void SpurGear::generateGearCoordinates() {
         generateInvoluteProfile();
         calculateAddendumCircle();
         caculateCurveBetweenBaseAndDedendumCircle();
@@ -168,8 +168,47 @@ namespace spur_gear {
         caculateFillet();
         getWholeTeethReflection();
         generateWholeGear();
+    }
 
+    std::vector<cv::Point2d> SpurGear::getGearCoordinates() {
+        if (m_gear.empty()) {
+            generateGearCoordinates();
+        }
         return m_gear;
+    }
+
+    cv::Mat SpurGear::drawGearWithDisplayDpi() {
+        if (m_gear.empty()) {
+            generateGearCoordinates();
+        }
+
+        double offset = findOptimizedOffset();
+        auto border = static_cast<int>(offset*2);
+        cv::Mat src = cv::Mat::zeros(cv::Size(border, border), CV_8UC3);
+        std::vector<cv::Point> points = std::vector<cv::Point>();
+        for (const cv::Point2d &point2d : m_gear) {
+            points.emplace_back(static_cast<int>(point2d.x * DISPLAY_DPI / INCH_PER_MM + offset),
+                                static_cast<int>(point2d.y * DISPLAY_DPI / INCH_PER_MM + offset));
+        }
+        const cv::Point *pts = (const cv::Point *) cv::Mat(points).data;
+        int npts = cv::Mat(points).rows;
+
+        // draw the polygon
+        polylines(src, &pts, &npts, 1, false, cv::Scalar(255, 0, 0), 1, CV_AA, 0);
+
+        return src;
+    }
+
+    double SpurGear::findOptimizedOffset() {
+        double max_x = 0.0;
+        double max_y = 0.0;
+
+        for (const auto &point : m_gear) {
+            max_x = (point.x > max_x) ? point.x : max_x;
+            max_y = (point.y > max_y) ? point.y : max_y;
+        }
+
+        return round(std::max(max_x, max_y) * DISPLAY_DPI / INCH_PER_MM) + 25;
     }
 
     std::ostream& operator<<(std::ostream& out, const spur_gear::SpurGear& gear) {

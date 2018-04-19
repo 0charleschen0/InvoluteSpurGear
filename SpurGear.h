@@ -16,6 +16,8 @@ namespace spur_gear {
         explicit SpurGear(int t_teethNumber = 25, double t_module = 4.0, double t_press = 20.0,
                  double t_fillet_radius = 0.05, double t_shift = 0.0, double t_backlash = 0.0);
 
+        cv::Mat drawGearWithDisplayDpi();
+
         std::vector<cv::Point2d> getGearCoordinates();
 
         int getTeethNumber() const {
@@ -33,8 +35,9 @@ namespace spur_gear {
         std::vector<cv::Point2d> getGear() const {
             return m_gear;
         }
-
     private:
+        const double DISPLAY_DPI = 72.0;
+        const double INCH_PER_MM = 25.4;
 
         const int m_teeth_number;
         const double m_module;
@@ -73,6 +76,10 @@ namespace spur_gear {
         void getWholeTeethReflection();
 
         void generateWholeGear();
+
+        void generateGearCoordinates();
+
+        double findOptimizedOffset();
     };
 
     std::ostream& operator<<(std::ostream& out, const spur_gear::SpurGear& gear);
