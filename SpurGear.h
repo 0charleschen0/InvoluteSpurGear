@@ -9,14 +9,17 @@
 #include "third-party/include/opencv2/opencv.hpp"
 #include "third-party/include/opencv2/core/core.hpp"
 
-namespace spur_gear {
+namespace SpurGear {
     class SpurGear {
 
     public:
+        const static int TYPE_DISPLAY = 0;
+        const static int TYPE_PRINTER = 1;
+
         explicit SpurGear(int t_teethNumber = 25, double t_module = 4.0, double t_press = 20.0,
                  double t_fillet_radius = 0.05, double t_shift = 0.0, double t_backlash = 0.0);
 
-        cv::Mat drawGearWithDisplayDpi();
+        void writeToPngFiles(std::string fileName, const int type = TYPE_DISPLAY);
 
         std::vector<cv::Point2d> getGearCoordinates();
 
@@ -37,6 +40,7 @@ namespace spur_gear {
         }
     private:
         const double DISPLAY_DPI = 72.0;
+        const double PRINTER_DPI = 300.0;
         const double INCH_PER_MM = 25.4;
 
         const int m_teeth_number;
@@ -80,10 +84,12 @@ namespace spur_gear {
         void generateGearCoordinates();
 
         double findOptimizedOffset();
+
+        cv::Mat drawGearWithType(int type = TYPE_DISPLAY);
     };
 
-    std::ostream& operator<<(std::ostream& out, const spur_gear::SpurGear& gear);
-    std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point2d>& list);
-    std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point>& list);
+//    std::ostream& operator<<(std::ostream& out, const SpurGear::SpurGear& gear);
+//    std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point2d>& list);
+//    std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point>& list);
 };
 #endif //INVOLUTESPURGEAR_SPURGEAR_H

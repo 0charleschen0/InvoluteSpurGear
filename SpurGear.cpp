@@ -7,7 +7,7 @@
 /**
  * /To calculate the coordinates of the involute profile
  */
-namespace spur_gear {
+namespace SpurGear {
     //TODO: Add undercut protection
     SpurGear::SpurGear(const int t_teethNumber, const double t_module, const double t_press,
              const double t_fillet_radius, const double t_shift, const double t_backlash)
@@ -177,9 +177,31 @@ namespace spur_gear {
         return m_gear;
     }
 
-    cv::Mat SpurGear::drawGearWithDisplayDpi() {
+    void SpurGear::writeToPngFiles(std::string fileName, int type) {
+        cv::Mat src = drawGearWithType(type);
+        cv::imwrite(fileName, src);
+    }
+
+    cv::Mat SpurGear::drawGearWithType(int type) {
         if (m_gear.empty()) {
             generateGearCoordinates();
+        }
+
+        double dpi;
+
+        switch (type) {
+            case TYPE_DISPLAY: {
+                dpi = DISPLAY_DPI;
+            break;
+            }
+            case TYPE_PRINTER: {
+                dpi = PRINTER_DPI;
+            break;
+            }
+            default: {
+                dpi = DISPLAY_DPI;
+            break;
+            }
         }
 
         double offset = findOptimizedOffset();
@@ -187,8 +209,8 @@ namespace spur_gear {
         cv::Mat src = cv::Mat::zeros(cv::Size(border, border), CV_8UC3);
         std::vector<cv::Point> points = std::vector<cv::Point>();
         for (const cv::Point2d &point2d : m_gear) {
-            points.emplace_back(static_cast<int>(point2d.x * DISPLAY_DPI / INCH_PER_MM + offset),
-                                static_cast<int>(point2d.y * DISPLAY_DPI / INCH_PER_MM + offset));
+            points.emplace_back(static_cast<int>(point2d.x * dpi / INCH_PER_MM + offset),
+                                static_cast<int>(point2d.y * dpi / INCH_PER_MM + offset));
         }
         const cv::Point *pts = (const cv::Point *) cv::Mat(points).data;
         int npts = cv::Mat(points).rows;
@@ -211,29 +233,29 @@ namespace spur_gear {
         return round(std::max(max_x, max_y) * DISPLAY_DPI / INCH_PER_MM) + 25;
     }
 
-    std::ostream& operator<<(std::ostream& out, const spur_gear::SpurGear& gear) {
-        return out << "teeth number: " << gear.getTeethNumber()
-                   << ", module: " << gear.getModule()
-                   << ", press angle: "<< gear.getPressAngle()<< '\n'
-                   << "coordinates: " << '\n' << gear.getGear();
-    }
+//    std::ostream& operator<<(std::ostream& out, const SpurGear::SpurGear& gear) {
+//        return out << "teeth number: " << gear.getTeethNumber()
+//                   << ", module: " << gear.getModule()
+//                   << ", press angle: "<< gear.getPressAngle()<< '\n'
+//                   << "coordinates: " << '\n' << gear.getGear();
+//    }
 
-    std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point2d>& list) {
-        out << "[\n";
-        for (auto point : list) {
-            out << point.x <<", "<< point.y << '\n';
-        }
-        out << "]\n";
-        return out;
-    }
+//    std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point2d>& list) {
+//        out << "[\n";
+//        for (auto point : list) {
+//            out << point.x <<", "<< point.y << '\n';
+//        }
+//        out << "]\n";
+//        return out;
+//    }
 
-    std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point>& list) {
-        out << "[\n";
-        for (auto point : list) {
-            out << point.x <<", "<< point.y << '\n';
-        }
-        out << "]\n";
-        return out;
-    }
-};
+//    std::ostream& operator<<(std::ostream& out, const std::vector<cv::Point>& list) {
+//        out << "[\n";
+//        for (auto point : list) {
+//            out << point.x <<", "<< point.y << '\n';
+//        }
+//        out << "]\n";
+//        return out;
+//    }
+}; //SpurGear
 
