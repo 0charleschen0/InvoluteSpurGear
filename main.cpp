@@ -1,39 +1,25 @@
 #include <iostream>
 
-#include "SpurGear.h"
+#include "widget.h"
 
-#include "third-party/include/opencv2/opencv.hpp"
-#include "third-party/include/opencv2/imgproc/imgproc.hpp"
-#include "third-party/include/opencv2/highgui/highgui.hpp"
+#include <QApplication>
+#include <QTranslator>
+#include <QLibraryInfo>
 
-const std::string window_name = "Gear Preview";
+int main(int argc, char *argv[]) {
+    QApplication application(argc, argv);
 
-int main() {
-    int teeth_number;
-    double module;
-    double press_angle;
+    QTranslator qtTranslator;
+    qtTranslator.load("qt_" + QLocale::system().name(),
+            QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    application.installTranslator(&qtTranslator);
 
-//TODO: Use GUI
-//    cout<<"Please input the teeth number: ";
-//    cin>>teeth_number;
-//    cout<<"Please input the module: ";
-//    cin>>module;
-//    cout<<"Please input the press angle: ";
-//    cin>>press_angle;
-//
-    spur_gear::SpurGear gear = spur_gear::SpurGear();
-    std::vector<cv::Point2d> points = gear.getGearCoordinates();
-    
-    cv::Mat src = gear.drawGearWithDisplayDpi();
-    cv::imwrite("test.png", src);
+    QTranslator myappTranslator;
+    myappTranslator.load("myapp_" + QLocale::system().name());
+    application.installTranslator(&myappTranslator);
 
-    //std::cout << gear;
-    
-    /// Create a window
-    imshow(window_name, src);
+    Widget widget;
+    widget.show();
 
-    /// Wait until user exit program by pressing a key
-    cv::waitKey(0);
-
-    return 0;
+    return application.exec();
 }
