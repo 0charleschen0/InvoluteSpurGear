@@ -1,7 +1,3 @@
-//
-// Created by USER on 2018/3/26.
-//
-
 #ifndef INVOLUTESPURGEAR_SPURGEAR_H
 #define INVOLUTESPURGEAR_SPURGEAR_H
 
@@ -21,8 +17,6 @@ namespace SpurGear {
 
         void writeToPngFiles(std::string fileName, const int type = TYPE_DISPLAY);
 
-        std::vector<cv::Point2d> getGearCoordinates();
-
         int getTeethNumber() const {
                return m_teeth_number;
         }
@@ -35,9 +29,10 @@ namespace SpurGear {
                return m_module;
         }
 
-        std::vector<cv::Point2d> getGear() const {
-            return m_gear;
-        }
+        std::vector<cv::Point2d> getGear();
+
+        bool isUnderCut();
+
     private:
         const double DISPLAY_DPI = 72.0;
         const double PRINTER_DPI = 300.0;

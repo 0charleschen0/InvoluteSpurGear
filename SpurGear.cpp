@@ -1,6 +1,3 @@
-//
-// Created by USER on 2018/3/27.
-//
 #include <algorithm>
 #include "SpurGear.h"
 
@@ -8,7 +5,6 @@
  * /To calculate the coordinates of the involute profile
  */
 namespace SpurGear {
-    //TODO: Add undercut protection
     SpurGear::SpurGear(const int t_teethNumber, const double t_module, const double t_press,
              const double t_fillet_radius, const double t_shift, const double t_backlash)
             : m_teeth_number(t_teethNumber),
@@ -20,12 +16,16 @@ namespace SpurGear {
         this->m_dimetral_pitch = 25.4 / m_module;
         this->m_pitch_diameter = m_teeth_number * m_module;
         this->m_base_circle_diameter = m_pitch_diameter * cos(m_press_angle);
-        this->m_addendum_diameter = m_pitch_diameter + 2 * m_module* (1 + m_shift);
+        this->m_addendum_diameter = m_pitch_diameter + 2 * m_module * (1 + m_shift);
         this->m_dedendum_diameter = m_pitch_diameter - 2.5 * m_module;
     }
 
+    bool SpurGear::isUnderCut() {
+        int undercut= static_cast<int>((2.0 * (1.0 - m_shift)/(std::pow(sin(m_press_angle), 2))) + 1.0);
+        return (m_teeth_number < undercut);
+    }
+
     void SpurGear::generateInvoluteProfile() {
-        double tooth_space = M_PI * m_pitch_diameter / (2 * m_teeth_number);
         int n = 10;
 
         for (int i = 0; i < n; i++) {
@@ -33,7 +33,8 @@ namespace SpurGear {
             double phi = acos(m_base_circle_diameter / (2 * r));
 
             //Involute equation for a angle x (radians) : f(x) = tan(x) - x
-            double theta = (tooth_space / m_pitch_diameter +  2 * m_shift * m_press_angle.getRadian() / m_module
+            double theta = (M_PI / (2 * m_teeth_number)
+                            +  2 * m_shift * tan(m_press_angle) / m_module
                             + (tan(m_press_angle) - m_press_angle.getRadian()) - (tan(phi) - phi));
 
             m_involute.emplace_back(r * sin(theta) - m_backlash, r * cos(theta));
@@ -42,15 +43,15 @@ namespace SpurGear {
 //        cout << m_involute;
     }
 
-/**
- * To calculate the addendum circle
- */
+    /**
+     * To calculate the addendum circle
+     */
     void SpurGear::calculateAddendumCircle() {
         int n = 5;
 
         double phi = acos(m_base_circle_diameter / (m_addendum_diameter));
-        double theta = (M_PI / (2 * m_teeth_number) + (tan(m_press_angle) - m_press_angle.getRadian())
-                        - (tan(phi) - phi));
+        double theta = (M_PI / (2 * m_teeth_number) + 2 * m_shift * tan(m_press_angle) / m_module
+                        + (tan(m_press_angle) - m_press_angle.getRadian()) - (tan(phi) - phi));
 
         for (int i = 0; i < n; i++) {
             double thetaO = theta * i / (n - 1);
@@ -61,18 +62,18 @@ namespace SpurGear {
 //        cout<<m_addendum_circle;
     }
 
-/**
- * To calculate the non-involute portion of the curve- between the base circle and
- *  dedendum circle - in this case, a straight line parallel to the y axis and connects
- * to the fillet arc
- */
+    /**
+     * To calculate the non-involute portion of the curve- between the base circle and
+     *  dedendum circle - in this case, a straight line parallel to the y axis and connects
+     * to the fillet arc
+     */
     void SpurGear::caculateCurveBetweenBaseAndDedendumCircle() {
         int n = 3;
         m_theta0 = asin((m_involute[m_involute.size() - 1].x + m_fillet_radius) / (m_dedendum_diameter / 2));
+        cv::Point2d point = m_involute[m_involute.size() - 1];
         for (int i = 0; i < n; i++) {
             //to find the angle between the central line (y-axis) and the line from the center
             //to the last point of the involute curve.
-            cv::Point2d point = m_involute[m_involute.size() - 1];
             m_curve_between_base_and_dedendum_circle.emplace_back(
                     point.x,
                     point.y - (point.y - m_fillet_radius - (m_dedendum_diameter / 2) * cos(m_theta0)) * i / n);
@@ -94,17 +95,17 @@ namespace SpurGear {
 //        cout << m_dedendum_circle;
     }
 
-/**
- * To calculate fillet
- * to draw the quarter of a circle from the last point of the non-involute part to
- * the tangent of the dedendum circle.
- */
+    /**
+     * To calculate fillet
+     * to draw the quarter of a circle from the last point of the non-involute part to
+     * the tangent of the dedendum circle.
+     */
     void SpurGear::caculateFillet() {
         int n = 5;
         for (int i = 0; i < n; i++) {
             m_fillet.emplace_back(
                     m_dedendum_circle[0].x - m_fillet_radius * cos(i * M_PI / (2 * (n - 1))),
-                    m_dedendum_circle[0].y + m_fillet_radius * (1 - sin(i) * M_PI / 2 * (n - 1)));
+                    m_dedendum_circle[0].y + m_fillet_radius * (1 - sin(i * M_PI / 2 * (n - 1))));
         }
     }
 
@@ -114,11 +115,11 @@ namespace SpurGear {
     void SpurGear::getWholeTeethReflection() {
         std::vector<std::vector<cv::Point2d>> pairVectorList = std::vector<std::vector<cv::Point2d>>();
 
-        pairVectorList.push_back(m_addendum_circle);
+//        pairVectorList.push_back(m_addendum_circle);
         pairVectorList.push_back(m_involute);
-        pairVectorList.push_back(m_curve_between_base_and_dedendum_circle);
-        pairVectorList.push_back(m_fillet);
-        pairVectorList.push_back(m_dedendum_circle);
+//        pairVectorList.push_back(m_curve_between_base_and_dedendum_circle);
+//        pairVectorList.push_back(m_fillet);
+//        pairVectorList.push_back(m_dedendum_circle);
 
         for (std::vector<cv::Point2d> v : pairVectorList) {
             m_gear.insert(m_gear.end(), v.begin(), v.end());
@@ -167,10 +168,10 @@ namespace SpurGear {
         caculateDedendumCircle();
         caculateFillet();
         getWholeTeethReflection();
-        generateWholeGear();
+        //generateWholeGear();
     }
 
-    std::vector<cv::Point2d> SpurGear::getGearCoordinates() {
+    std::vector<cv::Point2d> SpurGear::getGear() {
         if (m_gear.empty()) {
             generateGearCoordinates();
         }

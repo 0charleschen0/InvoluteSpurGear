@@ -56,10 +56,38 @@ void Widget::on_generateButton_clicked() {
                                                  filletRaduis,
                                                  shift,
                                                  backlash);
+    int status;
+
+    if (gear.isUnderCut()) {
+        status = popUpUnderCutMessageBox();
+    }
+
+    if (status == QMessageBox::Ok) {
+        return;
+    }
 
     QString fileName = QFileDialog::getSaveFileName(this,
             tr("Save Image"), QDir::currentPath(),
             tr("Image Files (*.png *.jpg *.bmp)"));
-
+    if (fileName != nullptr)
     gear.writeToPngFiles(fileName.toStdString());
+}
+
+int Widget::popUpUnderCutMessageBox() {
+    QMessageBox messageBox;
+    messageBox.setWindowTitle(tr("Under Cut Warning"));
+    messageBox.setInformativeText(tr("Under cut is detected!!\n "
+                                  "Please choose another attributes."));
+    messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Ignore);
+    messageBox.setDefaultButton(QMessageBox::Ok);
+    return messageBox.exec();
+}
+
+void Widget::resetAttributes() {
+    ui->teethNumberSpinBox->setValue(20);
+    ui->moduleDoubleSpinBox->setValue(2.0);
+    ui->pressAngleDoubleSpinBox->setValue(20);
+    ui->shiftDoubleSpinBox->setValue(0.0);
+    ui->filletRadiusDoubleSpinBox->setValue(0.38);
+    ui->backlashDoubleSpinBox->setValue(0.0);
 }

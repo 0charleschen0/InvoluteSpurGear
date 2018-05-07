@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QFileDialog>
+#include <QMessageBox>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
@@ -33,6 +34,10 @@ private slots:
 
 private:
     void setAdvancedAttributesVisible(bool isVisible);
+
+    int popUpUnderCutMessageBox();
+
+    void resetAttributes();
 
     Ui::Form *ui;
 };
